@@ -1,0 +1,1150 @@
+:root {
+    --bg: #0b0f17;
+    --panel: #111827;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --bad: #ef4444;
+    --shadow: 0 18px 60px rgba(0, 0, 0, .55);
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: #000000;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.wrap {
+    width: min(520px, 100%);
+    background: rgba(17, 24, 39, .72);
+    border: 1px solid rgba(255, 255, 255, .08);
+    box-shadow: var(--shadow);
+    border-radius: 22px;
+    padding: 18px 16px 16px;
+    backdrop-filter: blur(10px);
+}
+
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.1;
+}
+
+.title strong {
+    font-size: 15px
+}
+
+.title span {
+    font-size: 12px;
+    color: var(--muted)
+}
+
+.status {
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .10);
+    background: rgba(0, 0, 0, .18);
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.status.ok {
+    color: var(--ok);
+    border-color: rgba(34, 197, 94, .25)
+}
+
+.status.warn {
+    color: var(--warn);
+    border-color: rgba(245, 158, 11, .25)
+}
+
+.status.bad {
+    color: var(--bad);
+    border-color: rgba(239, 68, 68, .25)
+}
+
+/* Sphere Container */
+.orbZone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 0 14px;
+    perspective: 1000px;
+}
+
+.orb {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    position: relative;
+    /* Bright sphere with luminous white/cyan center */
+    background: radial-gradient(circle at 35% 35%,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(200, 240, 255, 0.95) 15%,
+            rgba(100, 200, 255, 0.85) 35%,
+            rgba(50, 150, 230, 0.7) 55%,
+            rgba(30, 100, 180, 0.5) 75%,
+            rgba(10, 50, 120, 0.3) 100%);
+    box-shadow:
+        0 0 60px rgba(100, 180, 255, 0.5),
+        0 0 100px rgba(80, 160, 255, 0.3),
+        0 0 140px rgba(60, 140, 255, 0.2),
+        inset -15px -15px 40px rgba(0, 50, 100, 0.4);
+    overflow: hidden;
+    will-change: transform;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* Fix for iOS Safari overflow clipping bug */
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    isolation: isolate;
+}
+
+/* Inner swirling layers */
+.orb-layer {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    border-radius: 40%;
+    opacity: 0.6;
+    filter: blur(30px);
+    mix-blend-mode: hard-light;
+}
+
+/* Layer 1: Bright blues/whites */
+.layer-1 {
+    background: conic-gradient(from 0deg,
+            transparent 0deg,
+            rgba(100, 200, 255, 0.8) 60deg,
+            transparent 120deg,
+            rgba(255, 255, 255, 0.9) 180deg,
+            transparent 240deg,
+            rgba(50, 150, 255, 0.8) 300deg,
+            transparent 360deg);
+    animation: rotate 8s linear infinite;
+}
+
+/* Layer 2: Deeper blues */
+.layer-2 {
+    background: conic-gradient(from 90deg,
+            transparent 0deg,
+            rgba(30, 80, 200, 0.6) 100deg,
+            transparent 200deg,
+            rgba(20, 50, 150, 0.7) 300deg,
+            transparent 360deg);
+    animation: rotate 12s linear infinite reverse;
+}
+
+/* Layer 3: Highlights */
+.layer-3 {
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 60%);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    filter: blur(10px);
+}
+
+/* Base keyframes for rotation */
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* STATES */
+
+/* IDLE: Slow, gentle movement */
+.orb.idle .layer-1 {
+    animation-duration: 8s;
+}
+
+.orb.idle .layer-2 {
+    animation-duration: 12s;
+}
+
+/* LISTENING: Slightly faster, maybe pulse scale via JS transform */
+.orb.listening .layer-1 {
+    animation-duration: 4s;
+}
+
+.orb.listening .layer-2 {
+    animation-duration: 6s;
+}
+
+/* SPEAKING: Fast, vibrant */
+.orb.speaking .layer-1 {
+    animation-duration: 1.5s;
+    opacity: 0.8;
+}
+
+.orb.speaking .layer-2 {
+    animation-duration: 2.5s;
+    opacity: 0.8;
+}
+
+/* Existing scale transform in JS will apply on top of .orb container */
+
+.hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 2px 0 14px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+button {
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(0, 0, 0, .25);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .05s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, .06)
+}
+
+button:active {
+    transform: scale(.98)
+}
+
+button.primary {
+    background: rgba(59, 130, 246, .16);
+    border-color: rgba(59, 130, 246, .28);
+}
+
+button.danger {
+    background: rgba(239, 68, 68, .14);
+    border-color: rgba(239, 68, 68, .28);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+/* Pseudo-fullscreen styling for iOS/Mobile fallback */
+body.pseudo-fullscreen {
+    padding: 0 !important;
+    align-items: flex-start;
+}
+
+body.pseudo-fullscreen .wrap {
+    width: 100%;
+    height: 100dvh;
+    /* dynamic viewport height */
+    max-width: none;
+    border-radius: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+}
+
+body.pseudo-fullscreen .log {
+    flex: 1;
+}
+
+.log {
+    margin-top: 12px;
+    background: rgba(0, 0, 0, .20);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    padding: 12px;
+    max-height: 220px;
+    overflow: auto;
+    font-size: 12px;
+    color: #d1d5db;
+    line-height: 1.35;
+}
+
+.log .row {
+    margin: 0 0 8px
+}
+
+.log .k {
+    color: var(--muted)
+}
+
+.log .err {
+    color: #fecaca
+}
+
+.log .ok {
+    color: #bbf7d0
+}
+
+.log code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
+    font-size: 11px;
+    color: #e5e7eb;
+}
+
+.hidden,
+#main-interface.hidden {
+    display: none !important;
+}
+
+.model-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.model-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 18px 20px;
+    background: rgba(0, 0, 0, .3);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.model-btn:hover {
+    background: rgba(255, 255, 255, .08);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, .15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+}
+
+.model-btn:active {
+    transform: scale(0.98);
+}
+
+.model-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.model-name {
+    color: var(--text);
+}
+
+/* Section Labels */
+.section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-top: 20px;
+    margin-bottom: 4px;
+    padding-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section-label:first-of-type {
+    margin-top: 10px;
+}
+
+/* Model Description */
+.model-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+    font-weight: 400;
+}
+
+/* Pro Model Buttons */
+.model-btn.pro {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+    border-color: rgba(139, 92, 246, 0.25);
+}
+
+.model-btn.pro:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%);
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.model-btn.pro .model-name::after {
+    content: " PRO";
+    font-size: 9px;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-left: 6px;
+    padding: 2px 5px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+/* Info Box */
+.info-box {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.info-box strong {
+    color: var(--text);
+}
+
+/* Responsive Grid for larger screens */
+@media (min-width: 480px) {
+    .model-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .model-btn {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+        padding: 16px 12px;
+    }
+
+    .model-desc {
+        margin-left: 0;
+    }
+
+    .model-btn.pro .model-name::after {
+        display: block;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+}
+
+/* --- New Simple UI Styles --- */
+
+.icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 0;
+    z-index: 10;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon-btn:active {
+    transform: scale(0.95);
+}
+
+.icon-btn.top-right {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+.icon-btn.top-left {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+.bottom-bar {
+    position: absolute;
+    bottom: 36px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 32px;
+    pointer-events: none;
+}
+
+.bottom-bar button {
+    pointer-events: auto;
+}
+
+.icon-btn.round-big {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(40, 40, 40, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.icon-btn.danger-soft {
+    background: rgba(30, 30, 30, 0.4);
+}
+
+.icon-btn.danger-soft:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+/* --- Mode Switching --- */
+
+/* When in Simple Mode: Hide the complex stuff */
+#main-interface.simple-mode .top,
+#main-interface.simple-mode .hint,
+#main-interface.simple-mode .controls,
+#main-interface.simple-mode .log,
+#main-interface.simple-mode #btnBackToSimple {
+    display: none !important;
+}
+
+/* When in Simple Mode: Full black screen with centered orb */
+#main-interface.simple-mode {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* When in Simple Mode: Ensure orb is centered and visible */
+#main-interface.simple-mode .orbZone {
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Simple mode top buttons - smaller and subtle */
+#main-interface.simple-mode .icon-btn.top-right,
+#main-interface.simple-mode .icon-btn.top-left {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    opacity: 0.5;
+}
+
+#main-interface.simple-mode .icon-btn.top-right:hover,
+#main-interface.simple-mode .icon-btn.top-left:hover {
+    opacity: 1;
+    background: transparent;
+}
+
+#main-interface.simple-mode .icon-btn.top-right svg,
+#main-interface.simple-mode .icon-btn.top-left svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Simple mode bottom bar buttons */
+#main-interface.simple-mode .bottom-bar {
+    bottom: 48px;
+    padding: 0 48px;
+}
+
+#main-interface.simple-mode .icon-btn.round-big {
+    width: 56px;
+    height: 56px;
+    background: rgba(50, 50, 50, 0.5);
+    border: none;
+}
+
+#main-interface.simple-mode .icon-btn.round-big:hover {
+    background: rgba(80, 80, 80, 0.6);
+}
+
+/* When NOT in Simple Mode (Advanced): Hide the simple controls */
+#main-interface:not(.simple-mode) #simple-controls {
+    display: none !important;
+}
+
+/* Show back button when not in simple mode */
+#main-interface:not(.simple-mode) #btnBackToSimple {
+    display: flex !important;
+}
+
+/* --- Multi-Chat Interface Styles --- */
+
+#multi-chat-interface {
+    width: 95vw;
+    height: 95vh;
+    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+    .chat-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-pane {
+        min-height: 200px;
+    }
+}
+
+.chat-pane {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+}
+
+.chat-status.thinking {
+    background: var(--warn);
+    animation: pulse 1s infinite;
+}
+
+.chat-status.done {
+    background: var(--ok);
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.chat-log {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.msg {
+    padding: 6px 10px;
+    border-radius: 8px;
+    max-width: 90%;
+    word-wrap: break-word;
+}
+
+.msg.user {
+    align-self: flex-end;
+    background: rgba(59, 130, 246, 0.15);
+    color: #eff6ff;
+}
+
+.msg.ai {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+}
+
+.multi-input-area {
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#multiInput {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+}
+
+#multiInput:focus {
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.model-btn.special {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+    border-color: rgba(34, 197, 94, 0.25);
+    grid-column: span 1;
+}
+
+@media (min-width: 480px) {
+    .model-btn.special {
+        grid-column: span 3;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+    }
+}
+
+/* --- Model Personality Colors --- */
+
+/* ChatGPT (Default / Blue) */
+.orb.chatgpt {
+    background: radial-gradient(circle at 35% 35%,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(200, 240, 255, 0.95) 15%,
+            rgba(100, 200, 255, 0.85) 35%,
+            rgba(50, 150, 230, 0.7) 55%,
+            rgba(30, 100, 180, 0.5) 75%,
+            rgba(10, 50, 120, 0.3) 100%);
+    box-shadow:
+        0 0 60px rgba(100, 180, 255, 0.5),
+        0 0 100px rgba(80, 160, 255, 0.3),
+        0 0 140px rgba(60, 140, 255, 0.2),
+        inset -15px -15px 40px rgba(0, 50, 100, 0.4);
+}
+
+/* Grok (Space Tech / Deep Violet-Blue) */
+.orb.grok {
+    background: radial-gradient(circle at 35% 35%,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(230, 230, 255, 0.95) 15%,
+            rgba(160, 160, 255, 0.85) 35%,
+            rgba(80, 70, 240, 0.7) 55%,
+            rgba(50, 40, 180, 0.5) 75%,
+            rgba(20, 10, 100, 0.3) 100%);
+    box-shadow:
+        0 0 60px rgba(120, 100, 255, 0.5),
+        0 0 100px rgba(80, 70, 220, 0.3),
+        0 0 140px rgba(60, 50, 180, 0.2),
+        inset -15px -15px 40px rgba(30, 10, 80, 0.4);
+}
+
+.orb.grok .layer-1 {
+    background: conic-gradient(from 0deg,
+            transparent 0deg,
+            rgba(120, 100, 255, 0.8) 60deg,
+            transparent 120deg,
+            rgba(255, 255, 255, 0.9) 180deg,
+            transparent 240deg,
+            rgba(100, 80, 255, 0.8) 300deg,
+            transparent 360deg);
+}
+
+.orb.grok .layer-2 {
+    background: conic-gradient(from 90deg,
+            transparent 0deg,
+            rgba(50, 40, 200, 0.6) 100deg,
+            transparent 200deg,
+            rgba(40, 30, 150, 0.7) 300deg,
+            transparent 360deg);
+}
+
+/* Gemini (Sparkle / Cyan-Teal) */
+.orb.gemini {
+    background: radial-gradient(circle at 35% 35%,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(220, 255, 250, 0.95) 15%,
+            rgba(100, 240, 255, 0.85) 35%,
+            rgba(40, 200, 220, 0.7) 55%,
+            rgba(20, 160, 190, 0.5) 75%,
+            rgba(10, 80, 100, 0.3) 100%);
+    box-shadow:
+        0 0 60px rgba(80, 240, 255, 0.5),
+        0 0 100px rgba(40, 210, 230, 0.3),
+        0 0 140px rgba(20, 180, 200, 0.2),
+        inset -15px -15px 40px rgba(0, 60, 80, 0.4);
+}
+
+.orb.gemini .layer-1 {
+    background: conic-gradient(from 0deg,
+            transparent 0deg,
+            rgba(80, 240, 255, 0.8) 60deg,
+            transparent 120deg,
+            rgba(255, 255, 255, 0.9) 180deg,
+            transparent 240deg,
+            rgba(60, 220, 240, 0.8) 300deg,
+            transparent 360deg);
+}
+
+.orb.gemini .layer-2 {
+    background: conic-gradient(from 90deg,
+            transparent 0deg,
+            rgba(30, 180, 200, 0.6) 100deg,
+            transparent 200deg,
+            rgba(20, 150, 170, 0.7) 300deg,
+            transparent 360deg);
+}
+
+/* --- Avatar Visualizer --- */
+
+/* When in Avatar Mode, override the orb background styles */
+.orb.mode-avatar {
+    background: none !important;
+    box-shadow: none !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    border-radius: 50% !important;
+    width: 300px !important;
+    /* Larger container for image */
+    height: 300px !important;
+}
+
+/* Hide layers in Avatar Mode */
+.orb.mode-avatar .orb-layer {
+    display: none !important;
+}
+
+/* Show Image in Avatar Mode */
+.orb.mode-avatar #avatar-image {
+    display: block !important;
+}
+
+/* Hide Image in Orb Mode (Default) */
+#avatar-image {
+    display: none;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    /* The user wants the transparent areas to be white */
+    background-color: #ffffff;
+    border: 4px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Breathing Animation for Avatar */
+@keyframes breathe {
+    0% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.03);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+}
+
+/* Only apply breathing to avatar image when idle/listening AND in avatar mode */
+.orb.mode-avatar.avatar-idle #avatar-image {
+    animation: breathe 4s ease-in-out infinite;
+}
+
+/* Helper to center the image within the container */
+.orb.mode-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Hologram Effect --- */
+
+/* Scanlines Overlay */
+.orb.mode-avatar::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0) 50%,
+            rgba(0, 0, 0, 0.2) 50%,
+            rgba(0, 0, 0, 0.2));
+    background-size: 100% 4px;
+    z-index: 2;
+    pointer-events: none;
+    animation: scanline 10s linear infinite;
+    mix-blend-mode: overlay;
+    border-radius: 50%;
+    /* Match avatar border radius */
+    display: none;
+    /* Disable scanlines */
+}
+
+/* Hologram Color/Glow */
+.orb.mode-avatar #avatar-image {
+    /* filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4)) contrast(1.1) brightness(1.2) sepia(0.2) hue-rotate(180deg) saturate(1.5); */
+    opacity: 1;
+    mix-blend-mode: normal;
+    /* Blends nicely with dark bg */
+}
+
+/* Flicker Animation */
+@keyframes hologram-flicker {
+    0% {
+        opacity: 0.9;
+    }
+
+    5% {
+        opacity: 0.8;
+    }
+
+    10% {
+        opacity: 0.9;
+    }
+
+    15% {
+        opacity: 0.3;
+    }
+
+    /* Glitch dip */
+    20% {
+        opacity: 0.9;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+
+    55% {
+        opacity: 0.7;
+    }
+
+    60% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0.9;
+    }
+}
+
+/* Apply flicker generally - REMOVED to prevent conflict with JS Visualizer */
+/* .orb.mode-avatar #avatar-image {
+    animation: breathe 4s ease-in-out infinite;
+} */
+
+/* Scanline Move */
+@keyframes scanline {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 0% 100%;
+    }
+}
+
+/* --- LIGHT MODE THEME --- */
+
+body.light-mode {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+    --text: #111827;
+    --muted: #4b5563;
+    --panel: #ffffff;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Light Mode: Container/Cards */
+body.light-mode .wrap,
+body.light-mode .chat-pane {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    color: #1f2937;
+}
+
+/* Light Mode: Buttons (Model Selection) */
+body.light-mode .model-btn {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #1f2937;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .model-btn:hover {
+    background: #f9fafb;
+    border-color: rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .model-name {
+    color: #111827;
+    font-weight: 600;
+}
+
+body.light-mode .model-desc {
+    color: #6b7280;
+}
+
+/* Light Mode: Pro Buttons */
+body.light-mode .model-btn.pro {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border-color: rgba(139, 92, 246, 0.15);
+}
+
+body.light-mode .model-btn.pro:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* Light Mode: Controls & Icons */
+body.light-mode .icon-btn {
+    background: rgba(0, 0, 0, 0.05);
+    /* Slight dark in light mode */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: #374151;
+}
+
+body.light-mode .icon-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #111827;
+    transform: scale(1.05);
+}
+
+body.light-mode .icon-btn.danger-soft {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+body.light-mode .icon-btn.danger-soft:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* Light Mode: Logs */
+body.light-mode .log {
+    background: #f9fafb;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #374151;
+}
+
+body.light-mode .log .k {
+    color: #6b7280;
+}
+
+body.light-mode .log code {
+    color: #1f2937;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Light Mode: Input Fields */
+body.light-mode input[type="text"],
+body.light-mode #multiInput {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-mode input[type="text"]::placeholder {
+    color: #9ca3af;
+}
+
+/* Light Mode: Simple Mode (Fullscreen) */
+body.light-mode #main-interface.simple-mode {
+    background: #f3f4f6 !important;
+}
+
+body.light-mode #main-interface.simple-mode .icon-btn.top-right,
+body.light-mode #main-interface.simple-mode .icon-btn.top-left {
+    color: #374151;
+    opacity: 0.6;
+}
+
+body.light-mode #main-interface.simple-mode .icon-btn.top-right:hover,
+body.light-mode #main-interface.simple-mode .icon-btn.top-left:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}

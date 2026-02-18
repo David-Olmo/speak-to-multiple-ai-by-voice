@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Voice UI (Realtime WebRTC)</title>
+
+    <!-- PWA / iOS Standalone Mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Voice UI" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0b0f17" />
+    <link rel="manifest" href="manifest_voice.json" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrap" id="selection-screen">
+        <div class="top">
+            <!-- Fullscreen Button for Selection Screen -->
+            <button id="btnFullscreenSelection" class="icon-btn top-left" aria-label="Fullscreen">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                    </path>
+                </svg>
+            </button>
+            <div class="title">
+                <strong>Select AI Model</strong>
+                <span>Choose your conversation partner</span>
+            </div>
+        </div>
+
+        <!-- Realtime APIs (Original) -->
+        <div class="section-label">⚡ Realtime APIs (Low Latency)</div>
+        <div class="model-grid">
+            <button class="model-btn" data-model="grok">
+                <span class="model-icon">🚀</span>
+                <span class="model-name">Grok</span>
+                <span class="model-desc">Realtime WS</span>
+            </button>
+            <button class="model-btn" data-model="gemini">
+                <span class="model-icon">✨</span>
+                <span class="model-name">Gemini</span>
+                <span class="model-desc">Realtime WS</span>
+            </button>
+            <button class="model-btn" data-model="chatgpt">
+                <span class="model-icon">🧠</span>
+                <span class="model-name">ChatGPT</span>
+                <span class="model-desc">Realtime WebRTC</span>
+            </button>
+        </div>
+
+        <!-- Pro Models (STT → LLM → TTS) -->
+        <div class="section-label">🏆 Pro Models (STT → LLM → TTS)</div>
+        <div class="model-grid">
+            <button class="model-btn pro" data-model="grok-pro">
+                <span class="model-icon">🚀</span>
+                <span class="model-name">Grok 4.1 Thinking</span>
+                <span class="model-desc">grok-4-1-fast-reasoning</span>
+            </button>
+            <button class="model-btn pro" data-model="gemini-pro">
+                <span class="model-icon">✨</span>
+                <span class="model-name">Gemini 3 Flash</span>
+                <span class="model-desc">gemini-3-flash</span>
+            </button>
+            <button class="model-btn pro" data-model="chatgpt-pro">
+                <span class="model-icon">🧠</span>
+                <span class="model-name">GPT-5.2</span>
+                <span class="model-desc">gpt-5.2</span>
+            </button>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ Pro Mode:</strong> Uses browser's Speech Recognition → REST API → Text-to-Speech.
+            Higher latency (~3-5s) but access to the most powerful models.
+        </div>
+
+        <!-- Talk to All Mode -->
+        <div class="section-label">🌐 All Models</div>
+        <div class="model-grid" style="grid-template-columns: 1fr;">
+            <button class="model-btn special" data-model="all">
+                <span class="model-icon">💬</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start;">
+                    <span class="model-name">Talk with Everyone</span>
+                    <span class="model-desc">Chat simultaneously with all 6 models</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Multi-Chat Interface -->
+    <div class="wrap hidden" id="multi-chat-interface">
+        <div class="top">
+            <div class="title">
+                <strong>Multi-Chat</strong>
+                <span>Broadcast to 6 Models</span>
+            </div>
+            <button id="btnExitMulti" class="icon-btn danger-soft" aria-label="Exit">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="chat-grid" id="chatGrid">
+            <!-- 6 Chat Panes will be injected here via JS -->
+        </div>
+
+        <div class="multi-input-area">
+            <input type="text" id="multiInput" placeholder="Type a message to everyone..." autocomplete="off">
+            <button id="btnMultiSend" class="primary">Send</button>
+        </div>
+    </div>
+
+    <div class="wrap hidden" id="main-interface">
+        <div class="top">
+            <div class="title">
+                <strong>Voice UI</strong>
+                <span id="model-label">n8n client_secret → OpenAI Realtime WebRTC</span>
+            </div>
+            <div id="status" class="status warn">Disconnected</div>
+        </div>
+
+        <div class="orbZone">
+            <div id="orb" class="orb idle" aria-label="Visualizer">
+                <!-- Avatar Mode Image -->
+                <img src="avatar.png" alt="AI Avatar" id="avatar-image" style="display:none;">
+
+                <!-- Orb Mode Layers -->
+                <div class="orb-layer layer-1"></div>
+                <div class="orb-layer layer-2"></div>
+                <div class="orb-layer layer-3"></div>
+            </div>
+        </div>
+
+        <div class="hint" id="hint">
+            Pulsa <b>Start</b>, habla normal, y deja de hablar para que responda.
+        </div>
+
+        <!-- Simple Mode Controls -->
+        <div id="simple-controls">
+
+            <!-- Fullscreen Button (Top Left) -->
+            <button id="btnFullscreenSimple" class="icon-btn top-left" aria-label="Fullscreen">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                    </path>
+                </svg>
+            </button>
+
+            <!-- Settings Button (Top Right) -->
+            <button id="btnSettings" class="icon-btn top-right" aria-label="Settings">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+            </button>
+
+            <!-- Bottom Controls -->
+            <div class="bottom-bar">
+                <button id="btnMute" class="icon-btn round-big" aria-label="Mute">
+                    <!-- Mic Icon -->
+                    <svg class="mic-on" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <!-- Mic Off Icon (Hidden by default) -->
+                    <svg class="mic-off hidden" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                        <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+                        <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </button>
+
+                <button id="btnClose" class="icon-btn round-big danger-soft" aria-label="Close">
+                    <!-- X Icon -->
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Advanced Mode Back Button -->
+        <button id="btnBackToSimple" class="icon-btn top-right hidden" style="z-index: 20;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5"></path>
+                <path d="M12 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+
+        <div class="controls">
+            <button id="btnStart" class="primary">Start</button>
+            <button id="btnStop" class="danger" disabled>Stop</button>
+            <button id="btnForceReply" class="secondary" style="display:none;">Force Reply</button>
+            <button id="btnFullscreen">Full Screen</button>
+        </div>
+
+        <!-- Pro Mode VAD Settings -->
+        <div id="vad-settings" class="controls"
+            style="display:none; flex-direction:column; align-items:center; margin-top:10px;">
+            <div style="display:flex; gap:10px; align-items:center; width:100%; justify-content:center;">
+                <label for="vadThreshold" style="color:rgba(255,255,255,0.7); font-size:14px;">Sensibilidad
+                    (Ruido):</label>
+                <input type="range" id="vadThreshold" min="0" max="0.1" step="0.005" value="0.01" style="width:100px;">
+                <span id="vadValue" style="color:#fff; font-size:14px; width:40px;">0.01</span>
+            </div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:4px;">
+                Sube esto si el AI se activa con ruido de fondo.
+            </div>
+        </div>
+
+        <div class="log" id="log"></div>
+
+        <audio id="remoteAudio" autoplay playsinline></audio>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+
+</html>
